@@ -4,7 +4,7 @@
 
 ## About The Project
 
-This repository contains a PyTorch implementation of the methods described in the paper [*Weakly Supervised Label Smoothing*](https://arxiv.org/abs/2012.01630) by Gustavo Penha and Claudia Hauff. This work was conducted as part of an academic project in Information Retrieval (IR).
+This repository contains a PyTorch implementation of the methods described in the paper [*Weakly Supervised Label Smoothing*](https://arxiv.org/abs/2012.08575) by Gustavo Penha and Claudia Hauff. This work was conducted as part of an academic project in Information Retrieval (IR).
 
 The paper proposes T-WSLS (Two-stage Weakly Supervised Label Smoothing), a Curriculum Learning approach for fine-tuning pointwise BERT rankers. Instead of relying solely on sparse human labels (one-hot encoding) or pure weak supervision, T-WSLS combines both dynamically during training.
 
