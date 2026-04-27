@@ -208,10 +208,12 @@ __marimo__/
 
 
 # Data
-data/*.parquet
-data/*.zip
-data/*.tsv
+
+data/**/*.parquet
+data/**/*.zip
+data/**/*.tsv
 data/index_*/
+
 
 # nohup
 
@@ -219,3 +221,8 @@ data/index_*/
 
 # models
 models/
+
+# res
+
+res/
+

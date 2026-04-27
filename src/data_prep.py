@@ -5,6 +5,7 @@ import re
 import numpy as np
 import argparse
 from tqdm.auto import tqdm
+import random
 
 if not pt.started():
     pt.init()
@@ -55,7 +56,7 @@ def negative_sampling_dataset(method, qid, query, ground_truth, corpus, index, k
     """
     if method =="random":
         filtered_corpus = corpus[corpus["docno"] != ground_truth]
-        random_samples = filtered_corpus.sample(n=k, random_state=0).copy()
+        random_samples = filtered_corpus.sample(n=k).copy()
         random_samples["qid"] = qid
         random_samples["query"] = query
         return random_samples
@@ -94,7 +95,7 @@ def build_query_context(method, request, corpus, label, index, k=9):
     negative_sampling.drop(columns=["rank", "docid"], errors="ignore", inplace=True)
     
     if "score" not in negative_sampling.columns:
-        negative_sampling["score"] = -1
+        negative_sampling["score"] = 0
 
     row_ground_truth = pd.DataFrame({
         "qid": [qid],
@@ -144,6 +145,10 @@ if __name__ == "__main__":
     method_name = args.method
     path_data = f"data/{dataset_name}"
     os.makedirs(path_data, exist_ok=True)
+
+    SEED = 0
+    random.seed(SEED)
+    np.random.seed(SEED)
 
     for split in ["train", "valid", "test"]:
         source_file = os.path.join(path_data, f"{split}.tsv")
