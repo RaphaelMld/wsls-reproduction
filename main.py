@@ -8,7 +8,7 @@ from torch.nn import BCEWithLogitsLoss
 from torch.optim import AdamW
 import random
 import numpy as np
-from src.dataset import MantisDynamicDataset
+from src.dataset import GenericDataset
 from src.train import train_model
 
 
@@ -23,7 +23,7 @@ def main():
     parser.add_argument("--test_method", type=str, default=None, choices=["BM25", "random"], help="Méthode pour le test (par défaut = --method)")
     parser.add_argument("--seed", type=int, default=0, help="graine aléatoire")
     parser.add_argument("--results_file", type=str, default="results_mantis.csv", help="Fichier CSV pour stocker les résultats")
-    parser.add_argument("--mode", type=str, choices=["baseline", "ls", "twsls"], required=True, help="Mode d'entraînement")
+    parser.add_argument("--mode", type=str,choices=["baseline", "ls", "tls", "wsls", "twsls"],required=True)
     parser.add_argument("--eps", type=float, default=0.2, help="Valeur de l'epsilon (par défaut 0.2)")
     parser.add_argument("--instances", type=int, default=100000, help="Nombre total d'instances")
     parser.add_argument("--save_models", action="store_true", help="sauvegarde les models")
@@ -31,6 +31,8 @@ def main():
     parser.add_argument("--decay", type=str, default="step", choices=["step", "linear", "exp", "cosine", "beta"], help="Type de décroissance pour le T-WSLS")
     parser.add_argument("--alpha", type=float, default=1.0, help="Paramètre alpha pour la loi Beta (si decay=beta)")
     parser.add_argument("--beta", type=float, default=1.0, help="Paramètre beta pour la loi Beta (si decay=beta)")
+    parser.add_argument("--eval_split", type=str, default="test", choices=["valid", "test"], help="Split d'évaluation (Tableau 1 = valid, Tableau 2 = test)")
+    
     
     args = parser.parse_args()
 
@@ -39,7 +41,7 @@ def main():
     print(f"Dataset {dataset_name} - Méthode {args.method} - Test: {test_method} - Mode {args.mode} - Epsilon {args.eps} ")
 
     train_file = f"data/{dataset_name}_{args.method}_train.parquet"
-    test_file = f"data/{dataset_name}_{test_method}_test.parquet"
+    test_file = f"data/{dataset_name}_{test_method}_{args.eval_split}.parquet"
     
     if not os.path.exists(train_file) or not os.path.exists(test_file):
         print(f"erreur, fichiers introuvables : lancer python src/data_prep.py --dataset {dataset_name} --method {args.method} --test_method {test_method}")
@@ -60,10 +62,10 @@ def main():
     model.to(device)
 
     # dataloader
-    dataset_train = MantisDynamicDataset(train_df, tokenizer, max_len=256)
+    dataset_train = GenericDataset(train_df, tokenizer, max_len=256)
     dataloader_train = DataLoader(dataset_train, batch_size=32, shuffle=True, num_workers=2)
 
-    dataset_test = MantisDynamicDataset(test_df, tokenizer, max_len=256)
+    dataset_test = GenericDataset(test_df, tokenizer, max_len=256)
     dataloader_test = DataLoader(dataset_test, batch_size=10, shuffle=False, num_workers=2)
 
     # optim et loss
@@ -101,8 +103,8 @@ def main():
     file_exists = os.path.isfile(res_file)
     with open(res_file, "a") as f:
         if not file_exists:
-            f.write("dataset,train_method,test_method,mode,decay,alpha,beta,eps,seed,r10_at_1\n")
-        f.write(f"{dataset_name},{args.method},{test_method},{args.mode},{args.decay},{args.alpha},{args.beta},{args.eps},{args.seed},{final_r10:.4f}\n")
+            f.write("dataset,train_method,test_method,eval_split,mode,decay,alpha,beta,eps,seed,r10_at_1\n")
+        f.write(f"{dataset_name},{args.method},{test_method},{args.eval_split},{args.mode},{args.decay},{args.alpha},{args.beta},{args.eps},{args.seed},{final_r10:.4f}\n")
     
     print(f"\nRésultat ajouté dans {res_file}")
 

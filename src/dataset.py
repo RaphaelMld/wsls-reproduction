@@ -3,7 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 import torch
 
 
-class MantisDynamicDataset(Dataset):
+class GenericDataset(Dataset):
     def __init__(self, training_data_df, tokenizer, max_len=128):
         self.data = training_data_df
         self.tokenizer = tokenizer
@@ -27,9 +27,7 @@ class MantisDynamicDataset(Dataset):
         
         input_ids = inputs["input_ids"].squeeze(0)
         attention_mask = inputs["attention_mask"].squeeze(0)
-        
-        # On renvoie les labels bruts les scores 
-        #pour faire le smoothing dynamiquement lors de l'entrainement -> curriculum learning
+
         label = torch.tensor(row["label"], dtype=torch.float)
         score = torch.tensor(row["score"], dtype=torch.float)
         
